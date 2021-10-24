@@ -12,7 +12,8 @@ private:
 public:
 	Server() = default;
 
-	explicit Server(std::string ip, std::string port, std::string dir)
+	explicit Server(const std::string& ip, const std::string& port,
+				const std::string& dir)
 		: _ip(ip), _port(port), _directory(dir)
 	{}
 	
