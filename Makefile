@@ -1,5 +1,5 @@
 all:
-	g++ -Wall -Wextra -Werror ./sources/*.cpp
+	g++ -std=c++0x -Wall -Wextra -Werror ./sources/*.cpp
 
 fclean:
 	rm -rf a.out
