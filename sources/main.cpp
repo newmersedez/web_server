@@ -1,4 +1,8 @@
-#include "../headers/header.hpp"
+#include "../classes/server.hpp"
+#include "../classes/client.hpp"
+
+#include <iostream>
+#include <unistd.h>
 
 void getServerDefaults(int argc, char *argv[], Server& server)
 {
