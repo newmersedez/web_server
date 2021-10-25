@@ -31,8 +31,10 @@ public:
 	int	connect(/* int sockfd, const struct sockaddr *addr, socklen_t addrlen */);
 	int	recv(/* int sockfd, void *buf, size_t len, int flags */);
 	int	send(/* int sockfd, const void *buf, size_t len, int flags */);
-	int	shutdown(/* int sockfd, int flags */);
-	int	close(/* int sockfd */);
-
-	~Client() = default;
+	
+	~Client()
+	{
+		shutdown(_sockfd, SHUT_RDWR);
+		close(_sockfd);
+	}
 };
