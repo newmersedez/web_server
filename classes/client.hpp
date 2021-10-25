@@ -1,12 +1,18 @@
 #pragma once
 
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <sys/types.h>
+#include <unistd.h>
 #include <string>
 
 class Client
 {
 private:
-	std::string	_ip;
-	std::string	_port;
+	int					_sockfd;
+	struct sockaddr_in	_addr;
+	std::string			_ip;
+	std::string			_port;
 
 public:
 	Client() = default;
