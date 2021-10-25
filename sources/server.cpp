@@ -1,5 +1,7 @@
 #include "../classes/server.hpp"
 
+/* Class methods */
+
 void Server::setIp(const std::string& ip)
 {
 	this->_ip = ip;
@@ -29,3 +31,5 @@ const std::string& Server::getDiretory() const
 {
 	return _directory;
 }
+
+/* Additional functions */

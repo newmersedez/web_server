@@ -1,5 +1,7 @@
 #include "../classes/client.hpp"
 
+/* Class methods */
+
 void Client::setIp(const std::string& ip)
 {
 	this->_ip = ip;
@@ -19,3 +21,5 @@ const std::string& Client::getPort() const
 {
 	return _port;
 }
+
+/* Additional functions */
