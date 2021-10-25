@@ -3,8 +3,9 @@
 
 #include <iostream>
 #include <unistd.h>
+#include <ctype.h>
 
-void getServerDefaults(int argc, char *argv[], Server& server)
+void setServerDefaults(int argc, char *argv[], Server& HTTPServer)
 {
 	const char	*optString = "h:p:d:";
 	int			opt = 0;
@@ -14,13 +15,13 @@ void getServerDefaults(int argc, char *argv[], Server& server)
 		switch (opt)
 		{
 		case 'h':
-			server.setIp(std::string(optarg));
+			HTTPServer.setIp(std::string(optarg));
 			break;
 		case 'p':
-			server.setPort(std::string(optarg));
+			HTTPServer.setPort(atoi(optarg));
 			break;
 		case 'd':
-			server.setDirectory(std::string(optarg));
+			HTTPServer.setDirectory(std::string(optarg));
 			break;
 		}
 	}
@@ -30,7 +31,16 @@ int main(int argc, char *argv[])
 {
 	Server	server;
 
-	getServerDefaults(argc, argv, server);
-	std::cout << server.getIp() << " " << server.getPort() << " " << server.getDiretory() << "\n";
+	setServerDefaults(argc, argv, server);
+	try
+	{
+		server.create();
+		server.run();
+	}
+	catch(std::runtime_error& ex)
+	{
+		std::cerr << ex.what() << std::endl;
+		server.terminate();
+	}
 	return 0;
 }
