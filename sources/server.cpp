@@ -1,39 +1,59 @@
 #include "../classes/server.hpp"
 
-/* Class methods */
+/* Private methods */
 
-inline void Server::setIp(const std::string& ip)
+bool Server::settingsApplied()
 {
-	this->_ip = ip;
+	if (_ip == "" || _port == 0 || _dir == "")
+		return false;
+	return true;
 }
 
-inline void Server::setPort(const uint16_t& port)
+void executeRequest(const char *buffer)
 {
-	this->_port = port;
+
 }
 
-inline void Server::setDirectory(const std::string& directory)
+/* Public methods */
+
+Server::~Server()
 {
-	this->_directory = directory;
+	shutdown(_sockfd, SHUT_RDWR);
+	close(_sockfd);
 }
 
-const std::string& Server::getIp() const
+void Server::setdefaults(int argc, char *argv[])
 {
-	return _ip;
-}
+	const char	*optString = "h:p:d:";
+	size_t		flags = 0;
+	int			opt = 0;
 
-const uint16_t& Server::getPort() const
-{
-	return _port;
-}
-
-const std::string& Server::getDiretory() const
-{
-	return _directory;
+	while ((opt = getopt(argc, argv, optString)) != -1)
+	{
+		switch (opt)
+		{
+		case 'h':
+			this->_ip = std::string(optarg);
+			++flags;
+			break;
+		case 'p':
+			this->_port = atoi(optarg);
+			++flags;
+			break;
+		case 'd':
+			this->_dir = std::string(optarg);
+			++flags;
+			break;
+		}
+	}
+	if (flags != 3)
+		throw std::invalid_argument("Invalid arguments");
 }
 
 void Server::create()
 {
+	if (settingsApplied() == false)
+		throw std::runtime_error("Server settings were not applied");
 	_addr.sin_family = AF_INET;
 	_addr.sin_port = htons(_port);
 	_addr.sin_addr.s_addr = htonl(INADDR_ANY);
@@ -47,15 +67,18 @@ void Server::create()
 
 void Server::run()
 {
+	if (settingsApplied() == false)
+		throw std::runtime_error("Server settings were not applied");
 	while (true)
 	{
-		int		slavefd;
-		char	buffer[1024];
+		int					slavefd;
+		static char			buffer[128] = {0};
 
-		if ((slavefd = accept(_sockfd, 0, 0)) < 0)	
+		if ((slavefd = accept(_sockfd, nullptr, nullptr)) < 0)	
 			throw std::runtime_error("accept() failed");
-		recv(slavefd, buffer, 1023, MSG_NOSIGNAL);
-		printf("buffer = %s", buffer);
+		if (recv(slavefd, buffer, 128, MSG_NOSIGNAL) < 0)
+			throw std::runtime_error("recv() failed");
+		executeRequest(buffer);
 		shutdown(slavefd, SHUT_RDWR);
 		close(slavefd);
 	}
@@ -65,6 +88,5 @@ void Server::terminate()
 {
 	shutdown(_sockfd, SHUT_RDWR);
 	close(_sockfd);
+	exit(EXIT_SUCCESS);
 }
-
-/* Additional functions */

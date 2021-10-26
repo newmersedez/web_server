@@ -1,14 +1,17 @@
 #pragma once
 
 #include <iostream>
+#include <sstream>
 #include <string>
 
 #include <sys/socket.h>
 #include <netinet/in.h>
-#include <arpa/inet.h>
 #include <sys/types.h>
+#include <arpa/inet.h>
+#include <sys/stat.h>
 #include <unistd.h>
-#include <stdio.h>
+#include <memory.h>
+#include <fcntl.h>
 
 class Server
 {
@@ -17,29 +20,23 @@ private:
 	struct sockaddr_in	_addr;
 	std::string			_ip;
 	uint16_t			_port;
-	std::string			_directory;
+	std::string			_dir;
+	size_t				_connections;
+
+private:
+	bool settingsApplied();
+	void executeRequest(const char *buffer);
 
 public:
-	Server() = default;
-
-	explicit Server(const std::string& ip, const uint16_t & port, const std::string& dir)
-		: _ip(ip), _port(port), _directory(dir)
+	Server()
+		:	_sockfd(0), _addr({0, 0, 0, 0}), _ip(""),
+			_port(0), _dir(""), _connections(0)
 	{}
-	
-	void setIp(const std::string& ip);
-	void setPort(const uint16_t& port);
-	void setDirectory(const std::string& directory);
+
+	void setdefaults(int argc, char *argv[]);
 	void create();
 	void run();
 	void terminate();
 
-	const std::string& getIp() const;
-	const uint16_t& getPort() const;
-	const std::string& getDiretory() const;
-
-	~Server()
-	{
-		shutdown(_sockfd, SHUT_RDWR);
-		close(_sockfd);
-	}
+	~Server();
 };
