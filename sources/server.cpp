@@ -1,26 +1,27 @@
 #include "../classes/server.hpp"
 
+Server::~Server()
+{
+	shutdown(_sockfd, SHUT_RDWR);
+	close(_sockfd);
+}
+
 /* Private methods */
 
-bool Server::settingsApplied()
+bool Server::settingsApplied() const
 {
 	if (_ip == "" || _port == 0 || _dir == "")
 		return false;
 	return true;
 }
 
-void executeRequest(const char *buffer)
+std::string Server::executeRequest(const std::string& request) const
 {
-
+	(void)request;
+	return (std::string("lalka"));
 }
 
 /* Public methods */
-
-Server::~Server()
-{
-	shutdown(_sockfd, SHUT_RDWR);
-	close(_sockfd);
-}
 
 void Server::setdefaults(int argc, char *argv[])
 {
@@ -56,7 +57,8 @@ void Server::create()
 		throw std::runtime_error("Server settings were not applied");
 	_addr.sin_family = AF_INET;
 	_addr.sin_port = htons(_port);
-	_addr.sin_addr.s_addr = htonl(INADDR_ANY);
+	inet_pton(_sockfd, _ip.c_str(), &_addr.sin_addr.s_addr);
+	// _addr.sin_addr.s_addr = htonl(INADDR_ANY);
 	if ((_sockfd = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP)) < 0)
 		throw std::runtime_error("socket() failed");
 	if (bind(_sockfd, (struct sockaddr *)&_addr, sizeof(_addr)) < 0)
@@ -71,14 +73,21 @@ void Server::run()
 		throw std::runtime_error("Server settings were not applied");
 	while (true)
 	{
-		int					slavefd;
-		static char			buffer[128] = {0};
+		int			slavefd;
+		std::string	request;
+		std::string	response;
+		static char	buffer[128] = {0};
 
 		if ((slavefd = accept(_sockfd, nullptr, nullptr)) < 0)	
 			throw std::runtime_error("accept() failed");
 		if (recv(slavefd, buffer, 128, MSG_NOSIGNAL) < 0)
 			throw std::runtime_error("recv() failed");
-		executeRequest(buffer);
+		request = buffer;
+		response = executeRequest(request);
+		if (send(slavefd, response.c_str(), response.length(), MSG_NOSIGNAL) < 0)
+			throw std::runtime_error("send() failed");
+		request.clear();
+		response.clear();
 		shutdown(slavefd, SHUT_RDWR);
 		close(slavefd);
 	}
