@@ -64,11 +64,7 @@ void Server::skeletonDaemon()
 
     /* Success: Let the parent terminate */
     if (pid > 0)
-	{
-		std::cout << "fork1 parent = " << getpid() << std::endl;
         exit(EXIT_SUCCESS);
-	}
-	std::cout << "fork1 child = " << getpid() << std::endl;
 
     /* On success: The child process becomes session leader */
     if (setsid() < 0)
@@ -88,11 +84,8 @@ void Server::skeletonDaemon()
 
     /* Success: Let the parent terminate */
     if (pid > 0)
-	{
-		std::cout << "fork2 parent = " << getpid() << std::endl;
-        exit(EXIT_SUCCESS);
-	}
-	std::cout << "fork2 child = " << getpid() << std::endl;
+		exit(EXIT_SUCCESS);
+	std::cout << "Server PID = " << getpid() << std::endl;
 
     /* Set new file permissions */
     umask(0);
