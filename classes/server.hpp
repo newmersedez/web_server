@@ -3,13 +3,12 @@
 #include <iostream>
 #include <string>
 
+#include "http_request.hpp"
 #include <sys/socket.h>
-#include <netinet/in.h>
 #include <sys/types.h>
 #include <arpa/inet.h>
 #include <sys/stat.h>
 #include <unistd.h>
-#include <memory.h>
 #include <fcntl.h>
 
 class Server
@@ -33,7 +32,7 @@ public:
 	{}
 
 	void run(int argc, char *argv[]);
-	void terminate();
+	void terminate(int exitcode);
 
 	~Server()
 	{

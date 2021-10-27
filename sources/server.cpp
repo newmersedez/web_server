@@ -15,17 +15,26 @@ void Server::run(int argc, char *argv[])
 
 		if ((slavefd = accept(_sockfd, nullptr, nullptr)) < 0)
 			throw std::runtime_error("accept failed");
-		recv(slavefd, buffer, 127, MSG_NOSIGNAL);
-		/* Create HTTP request, handle and send responce */
+		if (recv(slavefd, buffer, 127, MSG_NOSIGNAL) < 0)
+			throw std::runtime_error("recv() failed");
+
+		HTTPRequest	request;
+		std::string	responce;
+
+		request.createRequest(buffer);
+		responce = request.getResponce();
+		if (send(slavefd, responce.c_str(), responce.length() + 1, MSG_NOSIGNAL) < 0)
+			throw std::runtime_error("send() failed");
 		shutdown(slavefd, O_RDWR);
 		close(slavefd);
 	}
 }
 
-void Server::terminate()
+void Server::terminate(int exitcode)
 {
 	shutdown(_sockfd, O_RDWR);
 	close(_sockfd);
+	exit(exitcode);
 }
 
 /* Private methods */
@@ -51,7 +60,7 @@ void Server::setServerSettings(int argc, char *argv[])
 		}
 	}
 	if (_ip == "" || _port == 0 || _dir == "")
-		throw std::runtime_error("Invalid settings");
+		throw std::runtime_error("Settings setup failed");
 }
 
 void Server::createServer()

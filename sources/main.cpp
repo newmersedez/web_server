@@ -19,6 +19,6 @@ int main(int argc, char *argv[])
 	Server	server;
 
 	server.run(argc, argv);
-	server.terminate();
+	server.terminate(EXIT_SUCCESS);
 	return 0;
 }

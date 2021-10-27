@@ -19,6 +19,8 @@ public:
 		_connectStatus(""), _connectType(""), _connectLength(0)
 	{}
 
-	
+	void createRequest(const char *buffer);
+	std::string getResponce();
+
 	~HTTPRequest() = default;
 };
