@@ -22,7 +22,7 @@ int set_nonblock(int fd)
 
 int main(int argc, char *argv[])
 {
-	Server			server;
+	Server	server;
 
 	try
 	{

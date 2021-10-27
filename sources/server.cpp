@@ -102,10 +102,8 @@ void Server::skeletonDaemon()
     chdir(_dir.c_str());
 
     /* Close all open file descriptors */
-    int x;
-    for (x = sysconf(_SC_OPEN_MAX); x >= 0; x--) {
+    for (int x = sysconf(_SC_OPEN_MAX); x >= 0; x--)
         close(x);
-    }
 }
 
 void Server::setServerSettings(int argc, char *argv[])
