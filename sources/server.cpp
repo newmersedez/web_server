@@ -58,7 +58,6 @@ void Server::create()
 	_addr.sin_family = AF_INET;
 	_addr.sin_port = htons(_port);
 	inet_pton(_sockfd, _ip.c_str(), &_addr.sin_addr.s_addr);
-	// _addr.sin_addr.s_addr = htonl(INADDR_ANY);
 	if ((_sockfd = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP)) < 0)
 		throw std::runtime_error("socket() failed");
 	if (bind(_sockfd, (struct sockaddr *)&_addr, sizeof(_addr)) < 0)
