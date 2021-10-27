@@ -14,3 +14,12 @@ std::string HTTPRequest::getResponce()
 
 /* Private methods */
 
+std::string message404()
+{
+	return ("ahaha\n");
+}
+
+std::string message200()
+{
+	return ("ahaha\n");
+}

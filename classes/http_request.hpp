@@ -1,7 +1,10 @@
 #pragma once
 
-#include <string>
+#include "server.hpp"
 #include <cstdlib>
+#include <sstream>
+#include <string>
+#include <iostream>
 
 class HTTPRequest
 {
@@ -12,6 +15,9 @@ private:
 	std::string	_connectStatus;
 	std::string	_connectType;
 	size_t		_connectLength;
+
+	std::string message404();
+	std::string message200();
 
 public:
 	HTTPRequest()

@@ -39,6 +39,21 @@ void Server::terminate(int exitcode)
 
 /* Private methods */
 
+inline void Server::setIp(char *ip)
+{
+	this->_ip = std::string(ip);
+}
+
+inline void Server::setPort(uint16_t port)
+{
+	this->_port = port;
+}
+
+inline void Server::setDir(char *dir)
+{
+	this->_dir = std::string(dir);
+}
+
 void Server::setServerSettings(int argc, char *argv[])
 {
 	const char	*optString = "h:p:d:";
@@ -49,18 +64,20 @@ void Server::setServerSettings(int argc, char *argv[])
 		switch (opt)
 		{
 		case 'h':
-			_ip = std::string(optarg);
+			setIp(optarg);
 			break;
 		case 'p':
-			_port = atoi(optarg);
+			setPort(static_cast<uint16_t>(atoi(optarg)));
 			break;
 		case 'd':
-			_dir = std::string(optarg);
+			setDir(optarg);
 			break;
 		}
 	}
 	if (_ip == "" || _port == 0 || _dir == "")
 		throw std::runtime_error("Settings setup failed");
+	chroot(_dir.c_str());
+	chdir(_dir.c_str());
 }
 
 void Server::createServer()

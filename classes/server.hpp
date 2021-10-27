@@ -21,6 +21,9 @@ private:
 	std::string			_dir;
 
 private:
+	void setIp(char *ip);
+	void setPort(uint16_t port);
+	void setDir(char *dir);
 	void setServerSettings(int argc, char *argv[]);
 	void createServer();
 	void bindServer();
