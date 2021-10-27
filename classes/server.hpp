@@ -1,6 +1,5 @@
 #pragma once
 
-#include <experimental/filesystem>
 #include <iostream>
 #include <string>
 
@@ -13,8 +12,6 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <fcntl.h>
-
-namespace fs = std::experimental::filesystem;
 
 class Server
 {

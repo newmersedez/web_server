@@ -1,4 +1,10 @@
+#include <experimental/filesystem>
+#include <fstream>
 #include "../classes/server.hpp"
+
+#define ERROR_FILENAME	"ErrorLog.txt"
+
+namespace fs = std::experimental::filesystem;
 
 int set_nonblock(int fd)
 {
@@ -16,15 +22,21 @@ int set_nonblock(int fd)
 
 int main(int argc, char *argv[])
 {
-	Server	server;
+	Server			server;
 
 	try
 	{
+		fs::remove(ERROR_FILENAME);
 		server.run(argc, argv);
 	}
 	catch(const std::exception& e)
 	{
-		std::cerr << e.what() << '\n';
+		std::ofstream	stream;
+
+		stream.open(ERROR_FILENAME);
+		stream << e.what() << std::endl;
+		stream.close();
+		std::cerr << "Error detected. Open " << ERROR_FILENAME << std::endl;
 	}
 	server.terminate(EXIT_SUCCESS);
 	return 0;

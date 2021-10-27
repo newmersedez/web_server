@@ -4,8 +4,8 @@
 
 void Server::run(int argc, char *argv[])
 {
-	skeletonDaemon();
 	setServerSettings(argc, argv);
+	skeletonDaemon();
 	createServer();
 	bindServer();
 	listenServer();
@@ -129,7 +129,7 @@ void Server::setServerSettings(int argc, char *argv[])
 		}
 	}
 	if (_ip == "" || _port == 0 || _dir == "")
-		throw std::runtime_error("Settings setup failed");
+		throw std::runtime_error("Settings setup failed. Incorrect program arguments");
 }
 
 void Server::createServer()
