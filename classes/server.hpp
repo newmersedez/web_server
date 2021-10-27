@@ -33,7 +33,6 @@ private:
 	void createServer();
 	void bindServer();
 	void listenServer();
-	static void sigintHandler(int signum);
 
 public:
 	Server()
