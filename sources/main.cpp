@@ -18,19 +18,5 @@ int main(int argc, char *argv[])
 {
 	Server	server;
 
-	(void)argc;
-	(void)argv;
-	try
-	{
-		server.setdefaults(argc, argv);
-		server.create();
-		server.run();
-	}
-	catch(std::exception& ex)
-	{
-		std::cerr << ex.what() << std::endl;
-		server.terminate();
-	}
-	server.terminate();
 	return 0;
 }

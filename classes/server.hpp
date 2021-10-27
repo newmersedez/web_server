@@ -21,19 +21,14 @@ private:
 	uint16_t			_port;
 	std::string			_dir;
 
-private:
-	bool settingsApplied() const;
-	std::string executeRequest(const std::string& request) const;
-
 public:
 	Server()
 		: _sockfd(0), _addr({0, 0, 0, 0}), _ip(""), _port(0), _dir("")
 	{}
 
-	void setdefaults(int argc, char *argv[]);
-	void create();
-	void run();
-	void terminate();
-
-	~Server();
+	~Server()
+	{
+		shutdown(_sockfd, SHUT_RDWR);
+		close(_sockfd);
+	}
 };
