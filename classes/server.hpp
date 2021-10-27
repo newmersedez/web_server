@@ -1,15 +1,20 @@
 #pragma once
 
+#include <experimental/filesystem>
 #include <iostream>
 #include <string>
 
-#include "http_request.hpp"
+#include "httprequest.hpp"
 #include <sys/socket.h>
 #include <sys/types.h>
 #include <arpa/inet.h>
 #include <sys/stat.h>
+#include <signal.h>
+#include <stdio.h>
 #include <unistd.h>
 #include <fcntl.h>
+
+namespace fs = std::experimental::filesystem;
 
 class Server
 {
@@ -28,10 +33,11 @@ private:
 	void createServer();
 	void bindServer();
 	void listenServer();
+	static void sigintHandler(int signum);
 
 public:
 	Server()
-		: _sockfd(0), _addr({0, 0, 0, 0}), _ip(""), _port(0), _dir("")
+		: _sockfd(0), _addr({0, 0, {0}, {0}}), _ip(""), _port(0), _dir("")
 	{}
 
 	void run(int argc, char *argv[]);

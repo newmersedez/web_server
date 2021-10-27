@@ -18,7 +18,15 @@ int main(int argc, char *argv[])
 {
 	Server	server;
 
-	server.run(argc, argv);
+	try
+	{
+		server.run(argc, argv);
+	}
+	catch(const std::exception& e)
+	{
+		std::cerr << e.what() << '\n';
+	}
+	std::cout << "ahahaha\n";
 	server.terminate(EXIT_SUCCESS);
 	return 0;
 }

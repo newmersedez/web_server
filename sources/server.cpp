@@ -17,21 +17,23 @@ void Server::run(int argc, char *argv[])
 			throw std::runtime_error("accept failed");
 		if (recv(slavefd, buffer, 127, MSG_NOSIGNAL) < 0)
 			throw std::runtime_error("recv() failed");
-
-		HTTPRequest	request;
-		std::string	responce;
-
-		request.createRequest(buffer);
-		responce = request.getResponce();
+		printf("buffer = %s\n", buffer);
+		std::string	responce = "ahahahahahahaa lalkaaa";
 		if (send(slavefd, responce.c_str(), responce.length() + 1, MSG_NOSIGNAL) < 0)
 			throw std::runtime_error("send() failed");
 		shutdown(slavefd, O_RDWR);
 		close(slavefd);
+		signal(SIGINT, Server::sigintHandler);
+		pause();
 	}
 }
 
 void Server::terminate(int exitcode)
 {
+	fs::path	fullpath(fs::current_path());
+
+	fullpath += "/" + _dir;
+	fs::remove(fullpath);
 	shutdown(_sockfd, O_RDWR);
 	close(_sockfd);
 	exit(exitcode);
@@ -76,8 +78,13 @@ void Server::setServerSettings(int argc, char *argv[])
 	}
 	if (_ip == "" || _port == 0 || _dir == "")
 		throw std::runtime_error("Settings setup failed");
-	chroot(_dir.c_str());
-	chdir(_dir.c_str());
+
+	fs::path	fullpath(fs::current_path());
+
+	fullpath += "/" + _dir;
+	fs::create_directory(fullpath);
+	if (chroot(fullpath.c_str()) != 0)
+		throw std::runtime_error("chroot() failed");
 }
 
 void Server::createServer()
@@ -100,4 +107,9 @@ void Server::listenServer()
 {
 	if (listen(_sockfd, SOMAXCONN) < 0)
 		throw std::runtime_error("listen() failed");
+}
+
+void Server::sigintHandler(int signum)
+{
+	exit(signum);
 }
