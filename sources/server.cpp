@@ -92,7 +92,7 @@ void Server::skeletonDaemon()
 
     /* Change the working directory to the root directory */
     /* or another appropriated directory */
-    chdir(_dir.c_str());
+  	chdir(_dir.c_str());
 
     /* Close all open file descriptors */
     for (int x = sysconf(_SC_OPEN_MAX); x >= 0; x--)
