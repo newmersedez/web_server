@@ -21,10 +21,19 @@ private:
 	uint16_t			_port;
 	std::string			_dir;
 
+private:
+	void setServerSettings(int argc, char *argv[]);
+	void createServer();
+	void bindServer();
+	void listenServer();
+
 public:
 	Server()
 		: _sockfd(0), _addr({0, 0, 0, 0}), _ip(""), _port(0), _dir("")
 	{}
+
+	void run(int argc, char *argv[]);
+	void terminate();
 
 	~Server()
 	{

@@ -19,5 +19,6 @@ public:
 		_connectStatus(""), _connectType(""), _connectLength(0)
 	{}
 
+	
 	~HTTPRequest() = default;
 };
