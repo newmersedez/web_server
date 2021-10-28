@@ -1,22 +1,5 @@
 #include "../classes/request.hpp"
 
-// GET /other.html HTTP/1.0
-// Host: 127.0.0.1:1234
-// User-Agent: curl/7.68.0
-// Accept: */* 
-
-/*
-
-sstream << "HTTP/1.0 404 NOT FOUND";
-		sstream << "\r\n";
-		sstream << "Content-length: ";
-		sstream << 0;
-		sstream << "\r\n";
-		sstream << "Content-Type: text/html";
-		sstream << "\r\n\r\n";
-
-*/
-
 void HTTPRequest::initRequest(const char *buffer)
 {
 	std::string	strBuffer = std::string(buffer);
