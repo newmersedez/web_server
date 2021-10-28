@@ -7,13 +7,13 @@
 
 /*
 
-ss << "HTTP/1.0 404 NOT FOUND";
-		ss << "\r\n";
-		ss << "Content-length: ";
-		ss << 0;
-		ss << "\r\n";
-		ss << "Content-Type: text/html";
-		ss << "\r\n\r\n";
+sstream << "HTTP/1.0 404 NOT FOUND";
+		sstream << "\r\n";
+		sstream << "Content-length: ";
+		sstream << 0;
+		sstream << "\r\n";
+		sstream << "Content-Type: text/html";
+		sstream << "\r\n\r\n";
 
 */
 
@@ -38,21 +38,45 @@ void HTTPRequest::initRequest(const char *buffer)
 	}
 }
 
-std::string HTTPRequest::getResponce(const std::string& path) const
+std::string HTTPRequest::getResponce(const std::string& dir) const
 {
-	(void)path;
-	std::stringstream ss;
+	std::string	responce;
+	fs::path	fullpath(dir);
 
-	ss << "HTTP/" << this->_version;
-	ss << " 404 NOT FOUND";
-	ss << "\r\n";
-	ss << "Content-length: ";
-	ss << 0;
-	ss << "\r\n";
-	ss << "Content-Type: text/html";
-	ss << "\r\n\r\n";
-	
-	return ss.str();
+	fullpath += "/" + _purpose;
+	if (fs::exists(fullpath))
+		responce = message200(fullpath);
+	else
+		responce = message404();	
+	return responce;
+}
+
+std::string HTTPRequest::message200(const fs::path& path) const
+{
+	std::stringstream	sstream;
+
+	sstream << "HTTP/" << _version << " 200 OK";
+	sstream << "\r\n";
+	sstream << "Content-length: ";
+	sstream << fs::file_size(path);
+	sstream << "\r\n";
+	sstream << "Content-Type: text/html";
+	sstream << "\r\n\r\n";
+	return sstream.str();
+}
+
+std::string HTTPRequest::message404() const
+{
+	std::stringstream	sstream;
+
+	sstream << "HTTP/" << _version << " 404 NOT FOUND";
+	sstream << "\r\n";
+	sstream << "Content-length: ";
+	sstream << 0;
+	sstream << "\r\n";
+	sstream << "Content-Type: text/html";
+	sstream << "\r\n\r\n";
+	return sstream.str();
 }
 
 HTTPRequest *HTTPRequestCreator::factoryMethod() const

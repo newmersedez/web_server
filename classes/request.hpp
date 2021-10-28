@@ -5,6 +5,9 @@
 
 #include <string>
 #include <sstream>
+#include <experimental/filesystem>
+
+namespace fs = std::experimental::filesystem;
 
 /* Abstact class of HTTP message(request and respond) */
 
@@ -15,7 +18,7 @@ protected:
 
 public:
 	virtual void initRequest(const char *buffer) = 0;
-	virtual std::string getResponce(const std::string& path) const = 0;
+	virtual std::string getResponce(const std::string& dir) const = 0;
 	virtual ~HTTPMessage() {};
 };
 
@@ -28,11 +31,15 @@ private:
 	std::string _purpose;
 	std::string _version;
 
+private:
+	std::string message200(const fs::path& path) const;
+	std::string message404() const;
+
 public:
 	HTTPRequest() = default;
 
 	void initRequest(const char *buffer) override;
-	std::string getResponce(const std::string& path) const override;
+	std::string getResponce(const std::string& dir) const override;
 
 	~HTTPRequest() = default;
 };
