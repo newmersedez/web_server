@@ -1,15 +1,13 @@
 #pragma once
 
 #include <iostream>
+#include <sstream>
 #include <string>
 
-#include "httprequest.hpp"
 #include <sys/socket.h>
-#include <sys/types.h>
 #include <arpa/inet.h>
 #include <sys/stat.h>
 #include <signal.h>
-#include <stdio.h>
 #include <unistd.h>
 #include <fcntl.h>
 

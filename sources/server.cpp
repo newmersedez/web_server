@@ -1,4 +1,5 @@
 #include "../classes/server.hpp"
+#include "../classes/request.hpp"
 
 /* Public methods */
 
@@ -12,15 +13,19 @@ void Server::run(int argc, char *argv[])
 	while (true)
 	{
 		int		slavefd;
-		char	buffer[128] = {0};
+		char	buffer[512] = {0};
 
 		if ((slavefd = accept(_sockfd, nullptr, nullptr)) < 0)
 			throw std::runtime_error("accept failed");
 		if (recv(slavefd, buffer, 127, MSG_NOSIGNAL) < 0)
 			throw std::runtime_error("recv() failed");
-		printf("buffer = %s\n", buffer);
-		std::string	responce = "ahahahahahahaa lalkaaa";
-		if (send(slavefd, responce.c_str(), responce.length() + 1, MSG_NOSIGNAL) < 0)
+		
+		HTTPRequest	request;
+		std::string	responce;
+
+		request.initRequest(buffer);
+		responce = request.getResponce(_dir);
+		if (send(slavefd, responce.c_str(), responce.length(), MSG_NOSIGNAL) < 0)
 			throw std::runtime_error("send() failed");
 		shutdown(slavefd, O_RDWR);
 		close(slavefd);
