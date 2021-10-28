@@ -20,15 +20,18 @@ void Server::run(int argc, char *argv[])
 		if (recv(slavefd, buffer, 127, MSG_NOSIGNAL) < 0)
 			throw std::runtime_error("recv() failed");
 		
-		HTTPRequest	request;
-		std::string	responce;
-
-		request.initRequest(buffer);
-		responce = request.getResponce(_dir);
+		HTTPRequestFabric	*httpRequestFabric = new HTTPRequestCreator();
+		HTTPRequest			*request = httpRequestFabric->factoryMethod();
+		std::string			responce;
+	
+		request->initRequest(buffer);
+		responce = request->getResponce(_dir);
 		if (send(slavefd, responce.c_str(), responce.length(), MSG_NOSIGNAL) < 0)
 			throw std::runtime_error("send() failed");
 		shutdown(slavefd, O_RDWR);
 		close(slavefd);
+		delete request;
+		delete httpRequestFabric;
 	}
 }
 

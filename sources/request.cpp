@@ -55,7 +55,7 @@ std::string HTTPRequest::getResponce(const std::string& path) const
 	return ss.str();
 }
 
-HTTPMessage *HTTPRequestCreator::factoryMethod() const
+HTTPRequest *HTTPRequestCreator::factoryMethod() const
 {
 	return new HTTPRequest();
 }

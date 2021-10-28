@@ -39,17 +39,17 @@ public:
 
 /* Creator with fabric method */
 
-class HTTPMessageCreator
+class HTTPRequestFabric
 {
 public:
-	virtual HTTPMessage *factoryMethod() const = 0;
-	virtual ~HTTPMessageCreator() {};
+	virtual ~HTTPRequestFabric() {};
+	virtual HTTPRequest *factoryMethod() const = 0;
 };
 
 /* HTTP request/responce creators */
 
-class HTTPRequestCreator : public HTTPMessageCreator
+class HTTPRequestCreator : public HTTPRequestFabric
 {
-	HTTPMessage *factoryMethod() const override;
+	HTTPRequest *factoryMethod() const override;
 	~HTTPRequestCreator() = default;
 };
