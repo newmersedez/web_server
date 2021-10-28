@@ -52,7 +52,7 @@ void Server::run(int argc, char *argv[])
 					delete request;
 					delete httpRequestFabric;
 				}
-			}
+			} 
 		}
 		if (FD_ISSET(_masterSocket, &set))
 		{
