@@ -12,33 +12,83 @@ void Server::run(int argc, char *argv[])
 	listenServer();
 	while (true)
 	{
-		int		slavefd;
-		char	buffer[512] = {0};
+		fd_set	set;
+		int		maxfd;
 
-		if ((slavefd = accept(_sockfd, nullptr, nullptr)) < 0)
-			throw std::runtime_error("accept failed");
-		if (recv(slavefd, buffer, 127, MSG_NOSIGNAL) < 0)
-			throw std::runtime_error("recv() failed");
+		FD_ZERO(&set);
+		FD_SET(_masterSocket, &set);
+		for (const auto& obj: _slaveSockets)
+			FD_SET(obj, &set);
+		maxfd = std::max(_masterSocket,
+			*std::max_element(_slaveSockets.begin(),
+			_slaveSockets.end()));
+		select(maxfd + 1, &set, nullptr, nullptr, nullptr);
+		for (auto iter = _slaveSockets.begin();
+			iter != _slaveSockets.end();
+			iter++)
+		{
+			if (FD_ISSET(*iter, &set))
+			{
+				int		recvSize;
+				char	buffer[512] = {0};
+
+				recvSize = recv(*iter, buffer, 512, MSG_NOSIGNAL);
+				if (recvSize == 0 && errno == EAGAIN)
+				{
+					shutdown(*iter, SHUT_RDWR);
+					close(*iter);
+					iter = _slaveSockets.erase(iter);
+				}
+				else if (recvSize > 0)
+				{
+					 HTTPRequestFabric	*httpRequestFabric = new HTTPRequestCreator();
+					HTTPRequest			*request = httpRequestFabric->factoryMethod();
+					std::string			responce;
+				
+					request->initRequest(buffer);
+					responce = request->getResponce(_dir);
+					if (send(*iter, responce.c_str(), responce.length(), MSG_NOSIGNAL) < 0)
+						throw std::runtime_error("send() failed");
+					delete request;
+					delete httpRequestFabric;
+				}
+			}
+		}
+		if (FD_ISSET(_masterSocket, &set))
+		{
+			int	newSlaveSocket;
+
+			newSlaveSocket = accept(_masterSocket, nullptr, nullptr);
+			setNonBlock(newSlaveSocket);
+			_slaveSockets.insert(newSlaveSocket);
+		}
+		shutdown(_masterSocket, O_RDWR);
+		close(_masterSocket);
+
+		// if ((slavefd = accept(_masterSocket, nullptr, nullptr)) < 0)
+		// 	throw std::runtime_error("accept failed");
+		// if (recv(slavefd, buffer, 127, MSG_NOSIGNAL) < 0)
+		// 	throw std::runtime_error("recv() failed");
 		
-		HTTPRequestFabric	*httpRequestFabric = new HTTPRequestCreator();
-		HTTPRequest			*request = httpRequestFabric->factoryMethod();
-		std::string			responce;
+		// HTTPRequestFabric	*httpRequestFabric = new HTTPRequestCreator();
+		// HTTPRequest			*request = httpRequestFabric->factoryMethod();
+		// std::string			responce;
 	
-		request->initRequest(buffer);
-		responce = request->getResponce(_dir);
-		if (send(slavefd, responce.c_str(), responce.length(), MSG_NOSIGNAL) < 0)
-			throw std::runtime_error("send() failed");
-		shutdown(slavefd, O_RDWR);
-		close(slavefd);
-		delete request;
-		delete httpRequestFabric;
+		// request->initRequest(buffer);
+		// responce = request->getResponce(_dir);
+		// if (send(slavefd, responce.c_str(), responce.length(), MSG_NOSIGNAL) < 0)
+		// 	throw std::runtime_error("send() failed");
+		// shutdown(slavefd, O_RDWR);
+		// close(slavefd);
+		// delete request;
+		// delete httpRequestFabric;
 	}
 }
 
 void Server::terminate(int exitcode)
 {
-	shutdown(_sockfd, O_RDWR);
-	close(_sockfd);
+	shutdown(_masterSocket, O_RDWR);
+	close(_masterSocket);
 	exit(exitcode);
 }
 
@@ -132,8 +182,8 @@ void Server::setServerSettings(int argc, char *argv[])
 
 void Server::createServer()
 {
-	_sockfd = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
-	if (_sockfd < 0)
+	_masterSocket = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+	if (_masterSocket < 0)
 		throw std::runtime_error("socket() failed");
 }
 
@@ -141,13 +191,27 @@ void Server::bindServer()
 {
 	_addr.sin_family = AF_INET;
 	_addr.sin_port = htons(_port);
-	inet_pton(_sockfd, _ip.c_str(), &_addr.sin_addr.s_addr);
-	if (bind(_sockfd, (const sockaddr *)&_addr, sizeof(_addr)) < 0)
+	inet_pton(_masterSocket, _ip.c_str(), &_addr.sin_addr.s_addr);
+	if (bind(_masterSocket, (const sockaddr *)&_addr, sizeof(_addr)) < 0)
 		throw std::runtime_error("bind() failed");
 }
 
 void Server::listenServer()
 {
-	if (listen(_sockfd, SOMAXCONN) < 0)
+	if (listen(_masterSocket, SOMAXCONN) < 0)
 		throw std::runtime_error("listen() failed");
+}
+
+int Server::setNonBlock(int fd)
+{
+	int flags;
+	
+	#if defined(O_NONBLOCK)
+    	if (-1 == (flags = fcntl(fd, F_GETFL, 0)))
+        	flags = 0;
+    	return fcntl(fd, F_SETFL, (unsigned) flags | O_NONBLOCK);
+	#else
+    	flags = 1;
+    	return ioctl(fd, FIONBIO, &flags);
+	#endif
 }

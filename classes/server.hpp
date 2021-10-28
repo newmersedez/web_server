@@ -1,8 +1,10 @@
 #pragma once
 
+#include <algorithm>
 #include <iostream>
 #include <sstream>
 #include <string>
+#include <set>
 
 #include <sys/socket.h>
 #include <arpa/inet.h>
@@ -14,7 +16,8 @@
 class Server
 {
 private:
-	int					_sockfd;
+	int					_masterSocket;
+	std::set<int>		_slaveSockets;
 	struct sockaddr_in	_addr;
 	std::string			_ip;
 	uint16_t			_port;
@@ -29,10 +32,11 @@ private:
 	void createServer();
 	void bindServer();
 	void listenServer();
+	int setNonBlock(int fd);
 
 public:
 	Server()
-		: _sockfd(0), _addr({0, 0, {0}, {0}}), _ip(""), _port(0), _dir("")
+		: _masterSocket(0), _addr({0, 0, {0}, {0}}), _ip(""), _port(0), _dir("")
 	{}
 
 	void run(int argc, char *argv[]);
@@ -40,7 +44,7 @@ public:
 
 	~Server()
 	{
-		shutdown(_sockfd, SHUT_RDWR);
-		close(_sockfd);
+		shutdown(_masterSocket, SHUT_RDWR);
+		close(_masterSocket);
 	}
 };
