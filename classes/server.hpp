@@ -2,7 +2,7 @@
 
 #include <algorithm>
 #include <iostream>
-#include <sstream>
+#include <thread>
 #include <string>
 #include <set>
 
@@ -24,6 +24,7 @@ private:
 	std::string			_dir;
 
 private:
+	int setNonBlock(int fd);
 	void setIp(char *ip);
 	void setPort(uint16_t port);
 	void setDir(char *dir);
@@ -32,7 +33,8 @@ private:
 	void createServer();
 	void bindServer();
 	void listenServer();
-	int setNonBlock(int fd);
+	void acceptNewClient();
+	void handleRequest(int slavefd, const char *buffer);
 
 public:
 	Server()

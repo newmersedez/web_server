@@ -39,31 +39,15 @@ void Server::run(int argc, char *argv[])
 				}
 				else if (recvSize > 0)
 				{
-					HTTPRequestFabric	*httpRequestFabric = new HTTPRequestCreator();
-					HTTPRequest			*request = httpRequestFabric->factoryMethod();
-					std::string			responce;
-				
-					request->initRequest(buffer);
-					responce = request->getResponce(_dir);
-					if (send(*iter, responce.c_str(), responce.length(), MSG_NOSIGNAL) < 0)
-						throw std::runtime_error("send() failed");
-					delete request;
-					delete httpRequestFabric;
+					handleRequest(*iter, buffer);
 				}
 			} 
 		}
 		if (FD_ISSET(_masterSocket, &set))
 		{
-			int	newSlaveSocket;
-
-			if ((newSlaveSocket = accept(_masterSocket, nullptr, nullptr)) < 0)
-				throw std::runtime_error("accept() failed");
-			setNonBlock(newSlaveSocket);
-			_slaveSockets.insert(newSlaveSocket);
+			acceptNewClient();
 		}
 	}
-	shutdown(_masterSocket, O_RDWR);
-	close(_masterSocket);
 }
 
 void Server::terminate(int exitcode)
@@ -74,6 +58,20 @@ void Server::terminate(int exitcode)
 }
 
 /* Private methods */
+
+int Server::setNonBlock(int fd)
+{
+	int flags;
+	
+	#if defined(O_NONBLOCK)
+    	if (-1 == (flags = fcntl(fd, F_GETFL, 0)))
+        	flags = 0;
+    	return fcntl(fd, F_SETFL, (unsigned) flags | O_NONBLOCK);
+	#else
+    	flags = 1;
+    	return ioctl(fd, FIONBIO, &flags);
+	#endif
+}
 
 inline void Server::setIp(char *ip)
 {
@@ -183,16 +181,26 @@ void Server::listenServer()
 		throw std::runtime_error("listen() failed");
 }
 
-int Server::setNonBlock(int fd)
+void Server::acceptNewClient()
 {
-	int flags;
-	
-	#if defined(O_NONBLOCK)
-    	if (-1 == (flags = fcntl(fd, F_GETFL, 0)))
-        	flags = 0;
-    	return fcntl(fd, F_SETFL, (unsigned) flags | O_NONBLOCK);
-	#else
-    	flags = 1;
-    	return ioctl(fd, FIONBIO, &flags);
-	#endif
+	int	newSlaveSocket;
+
+	if ((newSlaveSocket = accept(_masterSocket, nullptr, nullptr)) < 0)
+		throw std::runtime_error("accept() failed");
+	setNonBlock(newSlaveSocket);
+	_slaveSockets.insert(newSlaveSocket);
+}
+
+void Server::handleRequest(int slavefd, const char *buffer)
+{
+	HTTPRequestFabric	*httpRequestFabric = new HTTPRequestCreator();
+	HTTPRequest			*request = httpRequestFabric->factoryMethod();
+	std::string			responce;
+
+	request->initRequest(buffer);
+	responce = request->getResponce(_dir);
+	if (send(slavefd, responce.c_str(), responce.length(), MSG_NOSIGNAL) < 0)
+		throw std::runtime_error("send() failed");
+	delete request;
+	delete httpRequestFabric;
 }
