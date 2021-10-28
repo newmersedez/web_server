@@ -23,9 +23,7 @@ void Server::run(int argc, char *argv[])
 			*std::max_element(_slaveSockets.begin(),
 			_slaveSockets.end()));
 		select(maxfd + 1, &set, nullptr, nullptr, nullptr);
-		for (auto iter = _slaveSockets.begin();
-			iter != _slaveSockets.end();
-			iter++)
+		for (auto iter = _slaveSockets.begin(); iter != _slaveSockets.end(); iter++)
 		{
 			if (FD_ISSET(*iter, &set))
 			{
@@ -41,7 +39,7 @@ void Server::run(int argc, char *argv[])
 				}
 				else if (recvSize > 0)
 				{
-					 HTTPRequestFabric	*httpRequestFabric = new HTTPRequestCreator();
+					HTTPRequestFabric	*httpRequestFabric = new HTTPRequestCreator();
 					HTTPRequest			*request = httpRequestFabric->factoryMethod();
 					std::string			responce;
 				
@@ -58,31 +56,14 @@ void Server::run(int argc, char *argv[])
 		{
 			int	newSlaveSocket;
 
-			newSlaveSocket = accept(_masterSocket, nullptr, nullptr);
+			if ((newSlaveSocket = accept(_masterSocket, nullptr, nullptr)) < 0)
+				throw std::runtime_error("accept() failed");
 			setNonBlock(newSlaveSocket);
 			_slaveSockets.insert(newSlaveSocket);
 		}
-		shutdown(_masterSocket, O_RDWR);
-		close(_masterSocket);
-
-		// if ((slavefd = accept(_masterSocket, nullptr, nullptr)) < 0)
-		// 	throw std::runtime_error("accept failed");
-		// if (recv(slavefd, buffer, 127, MSG_NOSIGNAL) < 0)
-		// 	throw std::runtime_error("recv() failed");
-		
-		// HTTPRequestFabric	*httpRequestFabric = new HTTPRequestCreator();
-		// HTTPRequest			*request = httpRequestFabric->factoryMethod();
-		// std::string			responce;
-	
-		// request->initRequest(buffer);
-		// responce = request->getResponce(_dir);
-		// if (send(slavefd, responce.c_str(), responce.length(), MSG_NOSIGNAL) < 0)
-		// 	throw std::runtime_error("send() failed");
-		// shutdown(slavefd, O_RDWR);
-		// close(slavefd);
-		// delete request;
-		// delete httpRequestFabric;
 	}
+	shutdown(_masterSocket, O_RDWR);
+	close(_masterSocket);
 }
 
 void Server::terminate(int exitcode)
